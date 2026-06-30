@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: MSWDO Head Portal",
+  "description": "Secure administrative dashboard and decision support system for Municipal Social Welfare and Development Officers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
