@@ -1,27 +1,72 @@
 import { useState, FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { User, Lock, Eye, EyeOff, ShieldAlert, LogIn, ShieldCheck } from 'lucide-react';
+import { FocalPerson, UserSession } from '../types';
+import { sha256 } from '../utils/security';
 
 interface LoginScreenProps {
-  onLoginSuccess: () => void;
+  focalPersons: FocalPerson[];
+  onLoginSuccess: (session: UserSession) => void;
 }
 
-export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
+export default function LoginScreen({ focalPersons, onLoginSuccess }: LoginScreenProps) {
   const [username, setUsername] = useState('admin_official');
   const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // Simulate server delay for beautiful administrative authenticating interaction
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess();
-    }, 1200);
+      
+      // 1. Check MSWDO Head official account
+      if (username.toLowerCase() === 'admin_official' && password === 'password123') {
+        onLoginSuccess({
+          username: 'admin_official',
+          role: 'head',
+          name: 'Catherine Jade',
+          email: 'catherinejade.original@wvsu.edu.ph',
+          profilePic: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
+        });
+        return;
+      }
+
+      // 2. Check Focal Person accounts
+      const focal = focalPersons.find(
+        f => f.username?.toLowerCase() === username.trim().toLowerCase()
+      );
+
+      if (focal) {
+        const inputHash = sha256(password);
+        if (focal.passwordHash === inputHash) {
+          // Account found and password matches! Check status
+          if (focal.status === 'Inactive') {
+            setError('Your account is inactive. Please contact the MSWDO Head.');
+            return;
+          }
+          
+          onLoginSuccess({
+            username: focal.username || username,
+            role: 'focal',
+            focalId: focal.id,
+            name: focal.name,
+            email: focal.email,
+            position: focal.position,
+            profilePic: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'
+          });
+        } else {
+          setError('Incorrect password. Please verify your credentials.');
+        }
+      } else {
+        setError('Authentication failed. Account username not found.');
+      }
+    }, 1000);
   };
 
   return (
@@ -62,6 +107,12 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           className="bg-surface-container-lowest shadow-xl rounded-xl border border-outline-variant p-8 md:p-10"
         >
           <form onSubmit={handleSubmit} className="flex flex-col gap-6" id="loginForm">
+            {error && (
+              <div className="bg-error/5 text-error text-xs p-3.5 rounded-lg border border-error/20 flex items-start gap-2 font-bold">
+                <ShieldAlert className="w-4 h-4 text-error flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
             {/* Username Input */}
             <div className="flex flex-col gap-2">
               <label className="font-label-md text-label-md text-primary uppercase tracking-widest px-1 font-bold" htmlFor="username">

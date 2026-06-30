@@ -12,7 +12,7 @@ import {
   X,
   ShieldCheck 
 } from 'lucide-react';
-import { ActiveTab } from '../types';
+import { ActiveTab, UserSession } from '../types';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -20,7 +20,7 @@ interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   onLogout: () => void;
-  profile: { name: string; profilePic: string; };
+  session: UserSession;
 }
 
 export default function Sidebar({ 
@@ -29,10 +29,16 @@ export default function Sidebar({
   isOpen, 
   setIsOpen, 
   onLogout,
-  profile
+  session
 }: SidebarProps) {
   
-  const navItems = [
+  const isFocal = session.role === 'focal';
+
+  const navItems = isFocal ? [
+    { id: 'dashboard', label: 'Focal Dashboard', icon: LayoutDashboard },
+    { id: 'program', label: 'My Assigned Programs', icon: ClipboardList },
+    { id: 'history', label: 'My Program Ledger', icon: History },
+  ] as const : [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'focal', label: 'Focal Management', icon: Contact },
     { id: 'program', label: 'Program Management', icon: ClipboardList },
@@ -54,25 +60,33 @@ export default function Sidebar({
         </div>
         <div>
           <span className="font-headline-md text-headline-md font-bold text-primary block leading-none">MSWDO</span>
-          <span className="text-[10px] font-label-md text-on-surface-variant uppercase tracking-widest block mt-0.5">Head Portal</span>
+          <span className="text-[10px] font-label-md text-on-surface-variant uppercase tracking-widest block mt-0.5">
+            {isFocal ? 'Focal Portal' : 'Head Portal'}
+          </span>
         </div>
       </div>
 
       {/* User Card */}
       <div className="mb-6 p-4 bg-surface-container rounded-xl flex items-center gap-3 border border-outline-variant/30 flex-shrink-0">
-        <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 shadow-sm flex-shrink-0">
-          <img 
-            className="w-full h-full object-cover" 
-            alt="Verified official avatar"
-            referrerPolicy="no-referrer"
-            src={profile.profilePic} 
-          />
+        <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center font-bold text-primary">
+          {session.profilePic ? (
+            <img 
+              className="w-full h-full object-cover" 
+              alt="User avatar"
+              referrerPolicy="no-referrer"
+              src={session.profilePic} 
+            />
+          ) : (
+            session.name.slice(0, 2).toUpperCase()
+          )}
         </div>
         <div className="overflow-hidden">
-          <p className="font-label-md text-on-surface font-bold text-sm truncate">{profile.name}</p>
+          <p className="font-label-md text-on-surface font-bold text-sm truncate">{session.name}</p>
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-            <span className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Verified Official</span>
+            <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">
+              {isFocal ? (session.position || 'Focal Officer') : 'Verified Head'}
+            </span>
           </div>
         </div>
       </div>
@@ -86,7 +100,7 @@ export default function Sidebar({
             <button
               id={`nav-item-${item.id}`}
               key={item.id}
-              onClick={() => handleNavClick(item.id)}
+              onClick={() => handleNavClick(item.id as ActiveTab)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-left font-medium group ${
                 isActive 
                   ? 'bg-secondary-container text-on-secondary-container font-bold shadow-sm' 

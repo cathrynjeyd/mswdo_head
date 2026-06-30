@@ -5,7 +5,8 @@ import {
   FocalPerson, 
   Program, 
   AllocationHistory, 
-  ActiveTab 
+  ActiveTab,
+  UserSession
 } from './types';
 import { 
   INITIAL_FOCAL_PERSONS, 
@@ -21,6 +22,8 @@ import ProgramTab from './components/ProgramTab';
 import BudgetTab from './components/BudgetTab';
 import HistoryTab from './components/HistoryTab';
 import SettingsTab from './components/SettingsTab';
+import FocalDashboardTab from './components/FocalDashboardTab';
+import FocalSettingsTab from './components/FocalSettingsTab';
 import ReportModal from './components/ReportModal';
 import NotificationsDropdown, { SystemNotification } from './components/NotificationsDropdown';
 
@@ -66,7 +69,7 @@ const syncFocalAndPrograms = (
 };
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState<UserSession | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -363,12 +366,76 @@ export default function App() {
     }, 1200);
   };
 
-  if (!isAuthenticated) {
-    return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+  if (!session) {
+    return (
+      <LoginScreen 
+        focalPersons={focalPersons} 
+        onLoginSuccess={(newSession) => {
+          setSession(newSession);
+          setActiveTab('dashboard');
+          showToast(`Signed in as ${newSession.name}`);
+        }} 
+      />
+    );
   }
 
   // Active page component matching
   const renderActiveTab = () => {
+    const isFocal = session.role === 'focal';
+
+    if (isFocal) {
+      const myFocal = focalPersons.find(f => f.id === session.focalId);
+      const myProgs = programs.filter(p => p.focalIds?.includes(session.focalId || ''));
+      const myProgNames = myProgs.map(p => p.name);
+      const myHistory = allocationHistory.filter(h => myProgNames.includes(h.programName));
+
+      switch (activeTab) {
+        case 'dashboard':
+          return (
+            <FocalDashboardTab 
+              focal={myFocal}
+              programs={myProgs}
+              history={myHistory}
+              onNavigate={(tab) => setActiveTab(tab)}
+            />
+          );
+        case 'program':
+          return (
+            <ProgramTab 
+              programs={myProgs}
+              focalPersons={focalPersons}
+              allocationHistory={myHistory}
+              onAddProgram={() => {}}
+              onEditProgram={() => {}}
+              onDeleteProgram={() => {}}
+              isReadOnly={true}
+            />
+          );
+        case 'history':
+          return (
+            <HistoryTab 
+              allocationHistory={myHistory} 
+              profile={{ 
+                name: session.name, 
+                email: session.email,
+                municipality: profile.municipality,
+                profilePic: profile.profilePic
+              }} 
+            />
+          );
+        case 'settings':
+          return (
+            <FocalSettingsTab 
+              focal={myFocal}
+              onUpdateFocal={handleEditFocal}
+            />
+          );
+        default:
+          return null;
+      }
+    }
+
+    // Standard MSWDO Head Views
     switch (activeTab) {
       case 'dashboard':
         return (
@@ -429,12 +496,13 @@ export default function App() {
   };
 
   const getPageTitle = () => {
+    const isFocal = session?.role === 'focal';
     switch (activeTab) {
-      case 'dashboard': return 'MSWDO Executive Dashboard';
+      case 'dashboard': return isFocal ? 'Focal Person Dashboard' : 'MSWDO Executive Dashboard';
       case 'focal': return 'Focal Management';
-      case 'program': return 'Program Management';
+      case 'program': return isFocal ? 'My Assigned Programs' : 'Program Management';
       case 'budget': return 'Budget Management';
-      case 'history': return 'Allocation History';
+      case 'history': return isFocal ? 'My Program Ledger' : 'Allocation History';
       case 'settings': return 'Account Settings';
     }
   };
@@ -463,11 +531,11 @@ export default function App() {
         isOpen={isMobileSidebarOpen} 
         setIsOpen={setIsMobileSidebarOpen} 
         onLogout={() => {
-          setIsAuthenticated(false);
+          setSession(null);
           setActiveTab('dashboard');
-          showToast('Signed out of MSWDO Head Portal.');
+          showToast('Signed out successfully.');
         }}
-        profile={profile}
+        session={session}
       />
 
       {/* Main Content Dashboard Frame */}

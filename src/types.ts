@@ -9,6 +9,9 @@ export interface FocalPerson {
   status: FocalStatus;
   avatarInitials: string;
   programName?: string; // Cache program name
+  username?: string;
+  passwordHash?: string;
+  lastLogin?: string;
 }
 
 export type ProgramStatus = 'Active' | 'Reviewing' | 'On Hold' | 'Completed';
@@ -45,3 +48,14 @@ export interface AllocationHistory {
 }
 
 export type ActiveTab = 'dashboard' | 'focal' | 'program' | 'budget' | 'history' | 'settings';
+
+export interface UserSession {
+  username: string;
+  role: 'head' | 'focal';
+  focalId?: string; // set if role is focal
+  name: string;
+  email: string;
+  profilePic?: string;
+  position?: string;
+}
+

@@ -35,6 +35,7 @@ interface ProgramTabProps {
   onAddProgram: (program: Omit<Program, 'id' | 'focalInitials'>) => void;
   onEditProgram: (program: Program) => void;
   onDeleteProgram: (id: string) => void;
+  isReadOnly?: boolean;
 }
 
 export default function ProgramTab({ 
@@ -43,7 +44,8 @@ export default function ProgramTab({
   allocationHistory,
   onAddProgram, 
   onEditProgram, 
-  onDeleteProgram 
+  onDeleteProgram,
+  isReadOnly = false
 }: ProgramTabProps) {
 
   // Search/Filters State
@@ -225,18 +227,20 @@ export default function ProgramTab({
   return (
     <div className="space-y-6">
       {/* Page Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Program Directory</h2>
           <p className="font-body-md text-body-md text-on-surface-variant font-medium mt-1">Oversee and monitor key social welfare initiatives, beneficiaries, and assigned personnel.</p>
         </div>
-        <button 
-          onClick={openAddModal}
-          className="bg-primary text-on-primary px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/95 transition-all active:scale-95 shadow-md font-bold text-sm focus:outline-none cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Program</span>
-        </button>
+        {!isReadOnly && (
+          <button 
+            onClick={openAddModal}
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/95 transition-all active:scale-95 shadow-md font-bold text-sm focus:outline-none cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Program</span>
+          </button>
+        )}
       </div>
 
       {/* Compact Bento-style Stats Grid */}
@@ -501,20 +505,24 @@ export default function ProgramTab({
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
-                          <button 
-                            onClick={() => openEditModal(prog)}
-                            className="p-1.5 hover:bg-secondary-container/25 text-secondary rounded-lg transition-colors focus:outline-none cursor-pointer" 
-                            title="Edit"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button 
-                            onClick={() => onDeleteProgram(prog.id)}
-                            className="p-1.5 hover:bg-rose-50 text-error rounded-lg transition-colors focus:outline-none cursor-pointer" 
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {!isReadOnly && (
+                            <>
+                              <button 
+                                onClick={() => openEditModal(prog)}
+                                className="p-1.5 hover:bg-secondary-container/25 text-secondary rounded-lg transition-colors focus:outline-none cursor-pointer" 
+                                title="Edit"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => onDeleteProgram(prog.id)}
+                                className="p-1.5 hover:bg-rose-50 text-error rounded-lg transition-colors focus:outline-none cursor-pointer" 
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

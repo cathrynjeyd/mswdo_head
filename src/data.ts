@@ -1,4 +1,7 @@
 import { FocalPerson, Program, AllocationHistory } from './types';
+import { sha256 } from './utils/security';
+
+const DEFAULT_HASH = sha256('Password123!');
 
 export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
   {
@@ -9,7 +12,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 'e.mendoza@mswdo.gov.ph',
     status: 'Active',
     avatarInitials: 'EM',
-    programName: 'Pantawid Pamilya (4Ps)'
+    programName: 'Pantawid Pamilya (4Ps)',
+    username: 'elena_mendoza',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: 'Jun 28, 2026, 02:30 PM'
   },
   {
     id: 'MSW-2024-002',
@@ -19,7 +25,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 'r.bautista@mswdo.gov.ph',
     status: 'Active',
     avatarInitials: 'RB',
-    programName: 'Disaster Relief'
+    programName: 'Disaster Relief',
+    username: 'roberto_bautista',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: 'Jun 29, 2026, 09:15 AM'
   },
   {
     id: 'MSW-2024-005',
@@ -29,7 +38,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 's.castro@mswdo.gov.ph',
     status: 'On Leave',
     avatarInitials: 'SC',
-    programName: 'PWD Assistance'
+    programName: 'PWD Assistance',
+    username: 'sofia_castro',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: 'Jun 12, 2026, 11:45 AM'
   },
   {
     id: 'MSW-2024-009',
@@ -39,7 +51,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 'j.santos@mswdo.gov.ph',
     status: 'Active',
     avatarInitials: 'JS',
-    programName: 'Senior Citizens Welfare'
+    programName: 'Senior Citizens Welfare',
+    username: 'julian_santos',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: 'Jun 30, 2026, 08:20 AM'
   },
   {
     id: 'MSW-2024-003',
@@ -49,7 +64,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 'm.santos@mswdo.gov.ph',
     status: 'Active',
     avatarInitials: 'MS',
-    programName: 'AICS Program'
+    programName: 'AICS Program',
+    username: 'maria_santos',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: 'Jun 29, 2026, 04:10 PM'
   },
   {
     id: 'MSW-2024-004',
@@ -59,7 +77,10 @@ export const INITIAL_FOCAL_PERSONS: FocalPerson[] = [
     email: 'j.delacruz@mswdo.gov.ph',
     status: 'Active',
     avatarInitials: 'JD',
-    programName: 'Solo Parent Program'
+    programName: 'Solo Parent Program',
+    username: 'juan_delacruz',
+    passwordHash: DEFAULT_HASH,
+    lastLogin: undefined
   }
 ];
 
